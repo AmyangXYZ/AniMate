@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useScene } from '../hooks/useScene.ts'
+import { useScene } from '../hooks/useScene'
 
 const canvas = ref()
 onMounted(() => {

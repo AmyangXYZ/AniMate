@@ -5,21 +5,25 @@ import {
   SceneLoader,
   Vector3,
   Mesh,
-  MeshBuilder,
   Color3,
   HemisphericLight,
   DirectionalLight,
   AbstractMesh,
-  Texture,
-  BackgroundMaterial,
   SkeletonViewer,
   Color4
 } from '@babylonjs/core'
 
-import { VmdLoader, MmdRuntime, MmdPhysics, MmdAnimation, MmdModel } from 'babylon-mmd'
-
+import {
+  VmdLoader,
+  MmdRuntime,
+  MmdAnimation,
+  MmdModel,
+  MmdAmmoPhysics,
+  MmdAmmoJSPlugin
+} from 'babylon-mmd'
+import ammo from '../utils/ammo.wasm'
 import { watch } from 'vue'
-import { PhysicsEnabled, SelectedAnimation, SelectedChar } from './useStates'
+import { SelectedAnimation, SelectedChar } from './useStates'
 
 export async function useScene(canvas: HTMLCanvasElement) {
   const engine = new Engine(canvas, true, {}, true)
@@ -27,20 +31,9 @@ export async function useScene(canvas: HTMLCanvasElement) {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.12, 0.1, 0.18, 0)
 
-  //   const havokInstance = await havokPhysics()
-  //   const havokPlugin = new HavokPlugin(true, havokInstance)
-  //   scene.enablePhysics(new Vector3(0, -98, 0), havokPlugin)
-  //   let physicsViewer: PhysicsViewer | undefined
-
-  //   const showPhysicsHelper = () => {
-  //     if (physicsViewer != undefined) {
-  //       physicsViewer.dispose()
-  //     }
-  //     physicsViewer = new PhysicsViewer(scene)
-  //     for (const node of modelMesh.getChildTransformNodes(true)) {
-  //       if (node.physicsBody) physicsViewer.showBody(node.physicsBody)
-  //     }
-  //   }
+  const ammoInstance = await ammo()
+  const ammoPlugin = new MmdAmmoJSPlugin(true, ammoInstance)
+  scene.enablePhysics(new Vector3(0, -1, 0), ammoPlugin)
 
   const initScene = () => {
     const camera = new ArcRotateCamera('ArcRotateCamera', 0, 0, 45, new Vector3(0, 12, 0), scene)
@@ -66,13 +59,7 @@ export async function useScene(canvas: HTMLCanvasElement) {
   let mmdRuntime: MmdRuntime, modelMesh: AbstractMesh, mmdModel: MmdModel, motion: MmdAnimation
 
   const initMMD = async () => {
-    let physics: MmdPhysics | undefined = undefined
-    if (PhysicsEnabled.value) {
-      physics = new MmdPhysics(scene)
-      physics.angularLimitClampThreshold = (30 * Math.PI) / 180
-    }
-    mmdRuntime = new MmdRuntime(scene, physics)
-
+    mmdRuntime = new MmdRuntime(scene, new MmdAmmoPhysics(scene))
     mmdRuntime.register(scene)
 
     await loadMesh()
@@ -89,7 +76,7 @@ export async function useScene(canvas: HTMLCanvasElement) {
   const loadMesh = async () => {
     modelMesh = await SceneLoader.ImportMeshAsync(
       undefined,
-      `/chars/${SelectedChar.value}/`,
+      `./chars/${SelectedChar.value}/`,
       `${SelectedChar.value}.pmx`,
       scene
     ).then((result) => {
@@ -107,7 +94,7 @@ export async function useScene(canvas: HTMLCanvasElement) {
   const loadMotion = async () => {
     motion = await vmdLoader.loadAsync(
       `${SelectedAnimation.value}`,
-      `/motions/${SelectedAnimation.value}.vmd`
+      `./motions/${SelectedAnimation.value}.vmd`
     )
     mmdModel.addAnimation(motion)
     mmdModel.setAnimation(`${SelectedAnimation.value}`)
@@ -141,15 +128,6 @@ export async function useScene(canvas: HTMLCanvasElement) {
         mmdRuntime.playAnimation()
       }
     }
-  })
-
-  watch(PhysicsEnabled, () => {
-    if (mmdRuntime != undefined) {
-      mmdRuntime.dispose(scene)
-      modelMesh.dispose()
-      mmdModel.dispose()
-    }
-    initMMD()
   })
 
   initScene()
