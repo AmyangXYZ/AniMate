@@ -6,11 +6,13 @@ let mainWindow: BrowserWindow
 function createWindow(): void {
   const display = screen.getPrimaryDisplay()
   // Create the browser window.
+  const width = 270
+  const height = 480
   mainWindow = new BrowserWindow({
-    width: 270,
-    height: 480,
-    x: display.bounds.width - 270,
-    y: display.bounds.height - 480 - 20,
+    width: width,
+    height: height,
+    x: display.bounds.width - width,
+    y: display.bounds.height - height - 20,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? {} : {}),
