@@ -1,5 +1,6 @@
 import { ref } from 'vue'
-
+export const showMenuBar = ref(false)
+export const showSettings = ref(false)
 export const Chars = [
   'Thoth',
   'Thoth2',
@@ -15,5 +16,5 @@ export const Chars = [
 export const Motions = ['Miku', 'Zyy', 'Stand', 'iKun1', 'iKun2', 'Run']
 
 export const SelectedChar = ref('Thoth')
-export const SelectedAnimation = ref('Stand')
+export const SelectedMotion = ref('Stand')
 export const OpenAI_API_KEY = ref('')

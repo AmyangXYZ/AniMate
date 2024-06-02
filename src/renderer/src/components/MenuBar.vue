@@ -1,28 +1,69 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-const show = ref(false)
+import { showMenuBar, showSettings } from '@renderer/hooks/useStates'
+import { Setting, Minus, Close } from '@element-plus/icons-vue'
+const minimize = () => {
+  window.electron.ipcRenderer.send('minimize')
+}
+const quit = () => {
+  window.electron.ipcRenderer.send('quit')
+}
 </script>
 
 <template>
-  <div class="menu-bar" @mouseover="show = true" @mouseleave="show = false">
-    <el-row v-show="show" justify="center">
-      <el-col :span="5">
-        <el-button id="drag">+</el-button>
-      </el-col>
-    </el-row>
+  <div class="wrap" @mouseenter="showMenuBar = true">
+    <Transition appear>
+      <div v-show="showMenuBar" class="menu-bar">
+        <el-row align="middle" justify="space-between">
+          <el-col :span="8">
+            <el-button
+              style="margin-left: 3px"
+              :icon="Setting"
+              @click="showSettings = !showSettings"
+            />
+          </el-col>
+          <el-col :span="8" align="center"> AniMate </el-col>
+          <el-col :span="8" align="end">
+            <el-button-group>
+              <el-button :icon="Minus" @click="minimize" />
+              <el-button :icon="Close" style="margin-right: 3px" @click="quit" />
+            </el-button-group>
+          </el-col>
+        </el-row>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <style scoped>
-.menu-bar {
+.wrap {
   position: absolute;
-  top: 0px;
-  width: 100%;
-  height: 20px;
-  z-index: 999;
+  top: 0;
+  width: 85%;
+  height: 28px;
 }
-#drag {
-  z-index: 999;
+.menu-bar {
+  width: 100%;
+  height: 100%;
+  font-size: 0.95rem;
+  background-color: rgb(34, 35, 39);
   -webkit-app-region: drag;
+  border-radius: 12px;
+}
+button {
+  border: none;
+  background-color: transparent;
+  width: 20px;
+  height: 24px;
+  -webkit-app-region: no-drag;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>

@@ -1,5 +1,13 @@
 @import './base.css';
 
+* {
+  outline: none !important;
+}
+
+:focus {
+  outline: none !important;
+}
+
 body {
   display: flex;
   align-items: center;
@@ -32,19 +40,6 @@ code {
   justify-content: center;
   flex-direction: column;
   margin-bottom: 80px;
-}
-
-.logo {
-  margin-bottom: 20px;
-  -webkit-user-drag: none;
-  height: 128px;
-  width: 128px;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 1.2em #6988e6aa);
 }
 
 .creator {

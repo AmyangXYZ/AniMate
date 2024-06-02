@@ -23,7 +23,7 @@ import {
 } from 'babylon-mmd'
 import ammo from '../utils/ammo.wasm'
 import { watch } from 'vue'
-import { SelectedAnimation, SelectedChar } from './useStates'
+import { SelectedMotion, SelectedChar } from './useStates'
 
 export async function useScene(canvas: HTMLCanvasElement) {
   const engine = new Engine(canvas, true, {}, true)
@@ -93,11 +93,11 @@ export async function useScene(canvas: HTMLCanvasElement) {
 
   const loadMotion = async () => {
     motion = await vmdLoader.loadAsync(
-      `${SelectedAnimation.value}`,
-      `./motions/${SelectedAnimation.value}.vmd`
+      `${SelectedMotion.value}`,
+      `./motions/${SelectedMotion.value}.vmd`
     )
     mmdModel.addAnimation(motion)
-    mmdModel.setAnimation(`${SelectedAnimation.value}`)
+    mmdModel.setAnimation(`${SelectedMotion.value}`)
     mmdRuntime.playAnimation()
   }
 
@@ -111,11 +111,11 @@ export async function useScene(canvas: HTMLCanvasElement) {
     loadMotion()
   })
 
-  watch(SelectedAnimation, async () => {
+  watch(SelectedMotion, async () => {
     if (mmdModel != undefined) {
       let exist = false
       for (const v of mmdModel.runtimeAnimations) {
-        if (v.animation != undefined && v.animation.name == SelectedAnimation.value) {
+        if (v.animation != undefined && v.animation.name == SelectedMotion.value) {
           exist = true
           break
         }
@@ -123,7 +123,7 @@ export async function useScene(canvas: HTMLCanvasElement) {
       if (!exist) {
         loadMotion()
       } else {
-        mmdModel.setAnimation(`${SelectedAnimation.value}`)
+        mmdModel.setAnimation(`${SelectedMotion.value}`)
         mmdRuntime.seekAnimation(0, true)
         mmdRuntime.playAnimation()
       }

@@ -1,4 +1,4 @@
-# assist
+# AniMate
 
 An Electron application with Vue and TypeScript
 

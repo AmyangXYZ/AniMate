@@ -1,12 +1,16 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
+let mainWindow: BrowserWindow
 function createWindow(): void {
+  const display = screen.getPrimaryDisplay()
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 270,
     height: 480,
+    x: display.bounds.width - 270,
+    y: display.bounds.height - 480 - 20,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? {} : {}),
@@ -52,8 +56,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('minimize', () => mainWindow.minimize())
+  ipcMain.on('quit', () => app.quit())
 
   createWindow()
 
