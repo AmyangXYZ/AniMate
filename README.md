@@ -1,10 +1,10 @@
 # AniMate
 
-An Electron application with Vue and TypeScript
+Display and chat with your anime char on desktop. Babylonjs+Electron+OpenAI.
 
-## Recommended IDE Setup
+Models are from https://aplaybox.com
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+![](./demo.gif)
 
 ## Project Setup
 

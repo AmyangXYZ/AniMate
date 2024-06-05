@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useScene } from '../hooks/useScene'
+import { useScene } from '@renderer/hooks/useScene'
 import { showMenuBar, showSettings } from '@renderer/hooks/useStates'
 
 const canvas = ref()
