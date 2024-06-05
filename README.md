@@ -4,7 +4,8 @@ Display and chat with your anime char on desktop. Babylonjs+Electron+OpenAI.
 
 Models are from https://aplaybox.com
 
-![](./demo.gif)
+<img src="demo1.gif" alt="view" width="320"/>
+<img src="demo2.gif" alt="chat" width="320"/>
 
 ## Project Setup
 
