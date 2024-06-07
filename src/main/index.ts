@@ -1,6 +1,7 @@
-import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, screen, dialog } from 'electron'
+
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { basename, dirname, join } from 'path'
 
 let mainWindow: BrowserWindow
 function createWindow(): void {
@@ -18,10 +19,12 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? {} : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      webSecurity: false
     },
     frame: false,
-    transparent: true
+    transparent: true,
+    resizable: true
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -59,7 +62,51 @@ app.whenReady().then(() => {
   })
 
   ipcMain.on('minimize', () => mainWindow.minimize())
+  let isFullScreen = false
+  ipcMain.on('fullscreen', () => {
+    console.log(mainWindow.isFullScreen())
+    if (!isFullScreen) {
+      mainWindow.setFullScreen(true)
+      isFullScreen = true
+    } else {
+      mainWindow.setFullScreen(false)
+      isFullScreen = false
+    }
+  })
   ipcMain.on('quit', () => app.quit())
+
+  ipcMain.on('dialog-char', (event) => {
+    dialog
+      .showOpenDialog(mainWindow, {
+        properties: ['openFile'],
+        filters: [{ name: 'Char', extensions: ['pmx'] }]
+      })
+      .then((result) => {
+        if (!result.canceled) {
+          const filePath = result.filePaths[0]
+          event.reply('selected-char', { dir: dirname(filePath) + '/', name: basename(filePath) })
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  })
+  ipcMain.on('dialog-motion', (event) => {
+    dialog
+      .showOpenDialog(mainWindow, {
+        properties: ['openFile'],
+        filters: [{ name: 'Motion', extensions: ['vmd'] }]
+      })
+      .then((result) => {
+        if (!result.canceled) {
+          const filePath = result.filePaths[0]
+          event.reply('selected-motion', { dir: dirname(filePath) + '/', name: basename(filePath) })
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  })
 
   createWindow()
 

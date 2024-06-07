@@ -9,7 +9,6 @@ import {
   HemisphericLight,
   DirectionalLight,
   AbstractMesh,
-  SkeletonViewer,
   Color4
 } from '@babylonjs/core'
 
@@ -21,15 +20,16 @@ import {
   MmdAmmoPhysics,
   MmdAmmoJSPlugin
 } from 'babylon-mmd'
-import ammo from '../utils/ammo.wasm'
-import { watch } from 'vue'
-import { SelectedMotion, SelectedChar } from './useStates'
+import ammo from './ammo/ammo.wasm'
+
+import { charPath, motionPath, showMenuBar, showSettings } from './useStates'
 
 export async function useScene(canvas: HTMLCanvasElement) {
   const engine = new Engine(canvas, true, {}, true)
 
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.12, 0.1, 0.18, 0)
+  scene.ambientColor = new Color3(0.5, 0.5, 0.5)
 
   const ammoInstance = await ammo()
   const ammoPlugin = new MmdAmmoJSPlugin(true, ammoInstance)
@@ -74,61 +74,68 @@ export async function useScene(canvas: HTMLCanvasElement) {
   }
 
   const loadMesh = async () => {
-    modelMesh = await SceneLoader.ImportMeshAsync(
-      undefined,
-      `./chars/${SelectedChar.value}/`,
-      `${SelectedChar.value}.pmx`,
-      scene
-    ).then((result) => {
-      const mesh = result.meshes[0]
-
-      const skeletonViewer = new SkeletonViewer(result.skeletons[0], modelMesh, scene, false)
-      skeletonViewer.isEnabled = true
-      skeletonViewer.color = new Color3(1, 0, 0)
-      return mesh
-    })
-
-    mmdModel = mmdRuntime.createMmdModel(modelMesh as Mesh)
+    if (mmdModel != undefined) {
+      mmdRuntime.destroyMmdModel(mmdModel)
+      modelMesh.dispose()
+    }
+    if (charPath.value != undefined) {
+      modelMesh = await SceneLoader.ImportMeshAsync(
+        undefined,
+        charPath.value.dir,
+        charPath.value.name,
+        scene
+      ).then((result) => {
+        const mesh = result.meshes[0]
+        return mesh
+      })
+      mmdModel = mmdRuntime.createMmdModel(modelMesh as Mesh)
+      loadMotion()
+    }
   }
 
   const loadMotion = async () => {
-    motion = await vmdLoader.loadAsync(
-      `${SelectedMotion.value}`,
-      `./motions/${SelectedMotion.value}.vmd`
-    )
-    mmdModel.addAnimation(motion)
-    mmdModel.setAnimation(`${SelectedMotion.value}`)
-    mmdRuntime.playAnimation()
+    if (motionPath.value != undefined) {
+      motion = await vmdLoader.loadAsync(
+        motionPath.value.name,
+        motionPath.value.dir + motionPath.value.name
+      )
+      mmdModel.addAnimation(motion)
+      mmdModel.setAnimation(motionPath.value.name)
+      mmdRuntime.playAnimation()
+    }
   }
 
-  watch(SelectedChar, async () => {
-    if (mmdModel != undefined) {
-      mmdRuntime.destroyMmdModel(mmdModel)
-      mmdModel.dispose()
-      modelMesh.dispose()
-    }
-    await loadMesh()
+  window.electron.ipcRenderer.on('selected-char', (_, file) => {
+    charPath.value = file
+    loadMesh()
+    showMenuBar.value = false
+    showSettings.value = false
+  })
+  window.electron.ipcRenderer.on('selected-motion', (_, file) => {
+    motionPath.value = file
     loadMotion()
+    showMenuBar.value = false
+    showSettings.value = false
   })
 
-  watch(SelectedMotion, async () => {
-    if (mmdModel != undefined) {
-      let exist = false
-      for (const v of mmdModel.runtimeAnimations) {
-        if (v.animation != undefined && v.animation.name == SelectedMotion.value) {
-          exist = true
-          break
-        }
-      }
-      if (!exist) {
-        loadMotion()
-      } else {
-        mmdModel.setAnimation(`${SelectedMotion.value}`)
-        mmdRuntime.seekAnimation(0, true)
-        mmdRuntime.playAnimation()
-      }
-    }
-  })
+  // watch(SelectedMotion, async () => {
+  //   if (mmdModel != undefined) {
+  //     let exist = false
+  //     for (const v of mmdModel.runtimeAnimations) {
+  //       if (v.animation != undefined && v.animation.name == SelectedMotion.value) {
+  //         exist = true
+  //         break
+  //       }
+  //     }
+  //     if (!exist) {
+  //       loadMotion()
+  //     } else {
+  //       mmdModel.setAnimation(`${SelectedMotion.value}`)
+  //       mmdRuntime.seekAnimation(0, true)
+  //       mmdRuntime.playAnimation()
+  //     }
+  //   }
+  // })
 
   initScene()
   initMMD()

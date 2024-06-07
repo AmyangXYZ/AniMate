@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { showMenuBar, showSettings } from '@renderer/hooks/useStates'
-import { Setting, Minus, Close } from '@element-plus/icons-vue'
+import { charPath, showMenuBar, showSettings } from '@renderer/hooks/useStates'
+import { Setting, Minus, FullScreen, Close } from '@element-plus/icons-vue'
+
 const minimize = () => {
   window.electron.ipcRenderer.send('minimize')
+}
+const fullscreen = () => {
+  window.electron.ipcRenderer.send('fullscreen')
 }
 const quit = () => {
   window.electron.ipcRenderer.send('quit')
@@ -12,7 +16,7 @@ const quit = () => {
 <template>
   <div class="wrap" @mouseenter="showMenuBar = true">
     <Transition appear>
-      <div v-show="showMenuBar" class="menu-bar">
+      <div v-show="showMenuBar || charPath == undefined" class="menu-bar">
         <el-row align="middle" justify="space-between">
           <el-col :span="8">
             <el-button
@@ -24,8 +28,9 @@ const quit = () => {
           <el-col :span="8" align="center"> AniMate </el-col>
           <el-col :span="8" align="end">
             <el-button-group>
-              <el-button :icon="Minus" @click="minimize" />
-              <el-button :icon="Close" style="margin-right: 3px" @click="quit" />
+              <el-button :icon="Minus" size="small" @click="minimize" />
+              <el-button :icon="FullScreen" size="small" @click="fullscreen" />
+              <el-button :icon="Close" size="small" style="margin-right: 3px" @click="quit" />
             </el-button-group>
           </el-col>
         </el-row>
