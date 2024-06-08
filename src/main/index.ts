@@ -64,7 +64,6 @@ app.whenReady().then(() => {
   ipcMain.on('minimize', () => mainWindow.minimize())
   let isFullScreen = false
   ipcMain.on('fullscreen', () => {
-    console.log(mainWindow.isFullScreen())
     if (!isFullScreen) {
       mainWindow.setFullScreen(true)
       isFullScreen = true
@@ -84,7 +83,10 @@ app.whenReady().then(() => {
       .then((result) => {
         if (!result.canceled) {
           const filePath = result.filePaths[0]
-          event.reply('selected-char', { dir: dirname(filePath) + '/', name: basename(filePath) })
+          event.reply('selected-char', {
+            dir: 'file://' + dirname(filePath) + '/',
+            name: basename(filePath)
+          })
         }
       })
       .catch((err) => {
@@ -100,7 +102,10 @@ app.whenReady().then(() => {
       .then((result) => {
         if (!result.canceled) {
           const filePath = result.filePaths[0]
-          event.reply('selected-motion', { dir: dirname(filePath) + '/', name: basename(filePath) })
+          event.reply('selected-motion', {
+            dir: 'file://' + dirname(filePath) + '/',
+            name: basename(filePath)
+          })
         }
       })
       .catch((err) => {
